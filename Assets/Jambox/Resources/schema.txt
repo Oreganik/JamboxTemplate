@@ -1,0 +1,23 @@
+# JAMBOX : HIGH SCORE SCHEMA FILE FOR UNITY
+# (c) Oreganik LLC, April 2019
+# Author: Ted Brown
+
+# ABOUT THIS FILE
+# - This file goes into your Unity project.
+# - Place it in the Resources folder.
+# - Name it 'schema.txt'
+# - It should only have one non-commented, non-empty line: that is the schema definition. 
+
+# CONNECTING WITH PHP
+# - Append the schema definition line to the 'schemas.txt' file in your PHP directory so it can properly read data from your game.
+# - Note: the PHP schema file supports multiple lines, because it can support multiple games.
+
+# HOW TO CONFIGURE
+# - Use one line of tab-delimited values.
+# - Don't use spaces or special characters.
+# - Make sure your Unity code is filling in the right information.
+#
+# - (!) The first value must be the game id. (!)
+
+# EXAMPLE
+# game_id	uid	date	player_name	score
