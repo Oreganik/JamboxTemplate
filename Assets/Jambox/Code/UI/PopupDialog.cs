@@ -19,6 +19,11 @@ namespace Jambox
 			get { return s_instance._container.gameObject.activeSelf; }
 		}
 
+		public static int LastOpenFrame
+		{
+			get; private set;
+		}
+
 		public static Action OnDialogClose;
 		public static Action OnDialogOpen;
 
@@ -58,11 +63,13 @@ namespace Jambox
 		public static void OpenOneOption (string title, string text, string option0, Action action0)
 		{
 			s_instance.ShowDialog(title, text, new string[] { option0 }, new Action[] { action0 });
+			SetCommandForOneOption(PAction.Action0);
 		}
 
 		public static void OpenTwoOptions (string title, string text, string option0, Action action0, string option1, Action action1)
 		{
 			s_instance.ShowDialog(title, text, new string[] { option0, option1 }, new Action[] { action0, action1 });
+			SetCommandsForTwoOptions(PAction.Action0, PAction.Action1);
 		}
 
 		public static void SetCommandForOneOption (PAction command)
@@ -179,6 +186,8 @@ namespace Jambox
 					}
 				}
 			}
+
+			LastOpenFrame = Time.frameCount;
 		}
 	}
 }

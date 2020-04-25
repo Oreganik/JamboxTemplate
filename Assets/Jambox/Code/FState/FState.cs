@@ -7,7 +7,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace NetStack
+namespace Jambox
 {
     public abstract class FState : MonoBehaviour 
     {
@@ -28,20 +28,24 @@ namespace NetStack
 		}
 
 		protected bool _isStopped;
-		protected FMachine _cMachine;
+		protected FMachine _fsm;
 		protected List<FTransition> _transitions;
 
-		public void Initialize (FMachine cMachine)
+		public void Initialize (FMachine finiteStateMachine)
 		{
-			_cMachine = cMachine;
+			_fsm = finiteStateMachine;
 			_transitions = new List<FTransition>();
 			RegisterTransitions();
 			gameObject.SetActive(false);
+			OnInitializeEnd();
 		}
 
 		public void Enter ()
 		{
-			Debug.Log(this.GetType().ToString() + ".Enter", gameObject);
+			if (_fsm.PrintDebug)
+			{
+				Debug.Log(this.GetType().ToString() + ".Enter", gameObject);
+			}
 			gameObject.SetActive(true);
 			_isStopped = false;
 			OnEnterEnd();
@@ -57,7 +61,10 @@ namespace NetStack
 
 		public void Exit ()
 		{
-			Debug.Log(this.GetType().ToString() + ".Exit", gameObject);
+			if (_fsm.PrintDebug)
+			{
+				Debug.Log(this.GetType().ToString() + ".Exit", gameObject);
+			}
 			OnExitBegin();
 			gameObject.SetActive(false);
 		}
@@ -74,6 +81,10 @@ namespace NetStack
 				}
 			}
 			_transitions.Add(new FTransition(trigger, this.Name, nextState));
+		}
+
+		protected virtual void OnInitializeEnd ()
+		{
 		}
 
 		protected abstract void RegisterTransitions ();

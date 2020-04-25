@@ -21,6 +21,11 @@ namespace Jambox
 			_max = max;
 		}
 
+		public float Lerp (float t)
+		{
+			return Mathf.Lerp(_min, _max, t);
+		}
+
 		public float Normalize (float value)
 		{
 			if (_min == _max)

@@ -7,10 +7,15 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace NetStack
+namespace Jambox
 {
     public class FMachine : MonoBehaviour 
     {
+		public FState ActiveState
+		{
+			get { return _activeState; }
+		}
+
 		public FState PreviousState
 		{
 			get { return _previousState; }
@@ -20,6 +25,9 @@ namespace NetStack
 		{
 			get { return _previousTransition; }
 		}
+
+		public bool PrintDebug = false;
+		public bool OperateEvenIfPaused;
 
 		private FState _activeState;
 		private FState _previousState;
@@ -55,7 +63,10 @@ namespace NetStack
 
 			if (transition != null)
 			{
-				Debug.Log(this.GetType().ToString() + ".Transition: " + transition.ToString());
+				if (PrintDebug)
+				{
+					Debug.Log(this.GetType().ToString() + ".Transition: " + transition.ToString());
+				}
 				_previousTransition = transition;
 				GoToState(transition.NextState);
 			}
@@ -92,6 +103,12 @@ namespace NetStack
 
 			foreach (FState state in states)
 			{
+				if (state.Name == null)
+				{
+					Debug.LogError(this.GetType().ToString() + ".Awake: Ignored null state name on " + state.gameObject.name, gameObject);
+					continue;
+				}
+
 				if (_finiteStates.ContainsKey(state.Name) == false)
 				{
 					_finiteStates.Add(state.Name, state);
@@ -147,6 +164,11 @@ namespace NetStack
 
 		protected void Update ()
 		{
+			if (OperateEvenIfPaused == false && App.Instance && App.Instance.IsPaused)
+			{
+				return;
+			}
+			
 			if (_activeState)
 			{
 				_activeState.Process(Time.deltaTime);

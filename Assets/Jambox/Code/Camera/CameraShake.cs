@@ -1,74 +1,83 @@
-﻿using UnityEngine;
+﻿// JAMBOX
+// General purpose game code for Unity
+// Copyright 2020 Ted Brown
+
+using UnityEngine;
 
 namespace Jambox
 {
+	[DefaultExecutionOrder(100)] // go late in the execution order so it layers on top of camera movement
 	public class CameraShake : MonoBehaviour 
 	{
-		public bool usePosX;
-		public bool usePosY;
-		public bool usePosZ;
-		public bool useRotX;
-		public bool useRotY;
-		public bool useRotZ;
+		static bool s_usePosX;
+		static bool s_usePosY;
+		static bool s_usePosZ;
+		static bool s_useRotX;
+		static bool s_useRotY;
+		static bool s_useRotZ;
 
-		float timer;
-		float duration;
+		private static CameraShake s_instance;
+
 		// magnitude is the total possible offset or rotation, from negative limit to positive limit
-		float positionMagnitude;
-		float rotationMagnitude;
+		static float s_positionMagnitude;
+		static float s_rotationMagnitude;
+		static Timer s_timer;
 
-		public void BigShake ()
-		{
-			usePosX = true;
-			usePosY = true;
-			usePosZ = true;
-			useRotX = false;
-			useRotY = false;
-			useRotZ = true;
-			StartShake(1, 5, 1);
-		}
-
-		public void LittleShake ()
-		{
-			usePosX = true;
-			usePosY = true;
-			usePosZ = false;
-			useRotX = false;
-			useRotY = false;
-			useRotZ = true;
-			StartShake(0.2f, 2f, 0.5f);
-		}
-
-		// Call this every frame on the camera object
-		public void ShakeTransform (Transform targetTransform)
+		public static void Shake (float positionMagnitude, float rotationMagnitude, float duration, bool isEpic = false)
 		{
 			if (duration <= 0) return;
-			timer = Mathf.Clamp(timer + Time.deltaTime, 0, duration);
-			float t = timer / duration;
-			if (t >= 1) return;
-
-			float posX = usePosX ? Random.Range(-positionMagnitude, positionMagnitude) * 0.5f * (1 - t) : 0;
-			float posY = usePosY ? Random.Range(-positionMagnitude, positionMagnitude) * 0.5f * (1 - t) : 0;
-			float posZ = usePosZ ? Random.Range(-positionMagnitude, positionMagnitude) * 0.5f * (1 - t) : 0;
-			targetTransform.localPosition += new Vector3(posX, posY, posZ);
-
-			float rotX = useRotX ? Random.Range(-rotationMagnitude, rotationMagnitude) * 0.5f * (1 - t) : 0;
-			float rotY = useRotY ? Random.Range(-rotationMagnitude, rotationMagnitude) * 0.5f * (1 - t) : 0;
-			float rotZ = useRotZ ? Random.Range(-rotationMagnitude, rotationMagnitude) * 0.5f * (1 - t) : 0;
-			targetTransform.localRotation *= Quaternion.Euler(new Vector3(rotX, rotY, rotZ));
+			s_positionMagnitude = positionMagnitude;
+			s_rotationMagnitude = rotationMagnitude;
+			s_timer = new Timer(duration);
+			s_usePosZ = isEpic;
 		}
 
-		public void StartShake (float positionMagnitude, float rotationMagnitude, float duration)
+		public static void Stop ()
 		{
-			this.positionMagnitude = positionMagnitude;
-			this.rotationMagnitude = rotationMagnitude;
-			this.duration = duration;
-			timer = 0;
+			s_timer.FinishNow();
 		}
 
-		public void StopShake ()
+		public static void BigShake ()
 		{
-			timer = duration;
+			Shake(1, 5, 1, isEpic: true);
+		}
+
+		public static void LittleShake ()
+		{
+			Shake(0.2f, 2f, 0.5f, isEpic: false);
+		}
+
+		protected void Awake ()
+		{
+			if (s_instance)
+			{
+				Debug.LogError("yo! you got too much camera shake");
+			}
+
+			s_instance = this;
+
+			s_usePosX = true;
+			s_usePosY = true;
+			s_usePosZ = false; // epic shakes will make this true
+			s_useRotX = false; // rotating x and y axis is weird
+			s_useRotY = false;
+			s_useRotZ = true;
+		}
+
+		protected void LateUpdate ()
+		{
+			s_timer.Update(Time.deltaTime);
+			float t = s_timer.t;
+
+			float posX = s_usePosX ? Random.Range(-s_positionMagnitude, s_positionMagnitude) * 0.5f * (1 - t) : 0;
+			float posY = s_usePosY ? Random.Range(-s_positionMagnitude, s_positionMagnitude) * 0.5f * (1 - t) : 0;
+			float posZ = s_usePosZ ? Random.Range(-s_positionMagnitude, s_positionMagnitude) * 0.5f * (1 - t) : 0;
+			transform.localPosition += new Vector3(posX, posY, posZ);
+
+			float rotX = s_useRotX ? Random.Range(-s_rotationMagnitude, s_rotationMagnitude) * 0.5f * (1 - t) : 0;
+			float rotY = s_useRotY ? Random.Range(-s_rotationMagnitude, s_rotationMagnitude) * 0.5f * (1 - t) : 0;
+			float rotZ = s_useRotZ ? Random.Range(-s_rotationMagnitude, s_rotationMagnitude) * 0.5f * (1 - t) : 0;
+			transform.localRotation *= Quaternion.Euler(new Vector3(rotX, rotY, rotZ));
 		}
 	}
 }

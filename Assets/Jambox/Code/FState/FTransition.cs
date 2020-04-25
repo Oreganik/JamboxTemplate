@@ -7,7 +7,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace NetStack
+namespace Jambox
 {
     public class FTransition
     {

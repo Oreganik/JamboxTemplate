@@ -1,6 +1,6 @@
 ﻿// JAMBOX
 // General purpose game code for Unity
-// Copyright 2019 Ted Brown
+// Copyright 2020 Ted Brown
 
 using UnityEngine;
 using System.Collections;
