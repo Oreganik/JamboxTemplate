@@ -50,6 +50,7 @@ namespace Jambox
 			}
 		}
 
+		public static float DeadzoneLeft = 0;
 		private static bool s_isUsingGamepad;
 		private static GamepadButton[] s_gamepadButtons;
 		private static KeyCode[] s_keyCodes;
@@ -117,6 +118,11 @@ namespace Jambox
 			{ PAction.Action1, 1 },
 			{ PAction.Action2, 2 }, // middle mouse button
 		};
+
+		public static void Debounce (PAction command)
+		{
+			// dang... gotta rewrite this to execute earlier in the order, and then have a way clear actions, not inputs
+		}
 
 		public static string GetJoystickButtonName(GamepadButton button)
 		{
@@ -310,7 +316,15 @@ namespace Jambox
 			}
 
 			// NOTE: This is with the old input manager, and assumes the Horizontal and Vertical axes for keyboard have been deleted.
-			input = new Vector2(Input.GetAxis("Horizontal"), Input.GetAxis("Vertical"));
+			float x = Input.GetAxis("Horizontal");
+			//if (Mathf.Abs(x) < DeadzoneLeft) x = 0;
+
+			float y = Input.GetAxis("Vertical");
+			//if (Mathf.Abs(y) < DeadzoneLeft) y = 0;
+
+			input = new Vector2(x, y);
+
+			if (input.magnitude < DeadzoneLeft) input = Vector2.zero;
 
 			if (input.magnitude > 0)
 			{
@@ -318,6 +332,13 @@ namespace Jambox
 			}
 
 			return input;
+		}
+
+		/// <summary>Returns XY move input on XZ axes</summary>
+		public static Vector3 GetWorldMove ()
+		{
+			Vector2 move = GetMove();
+			return new Vector3(move.x, 0, move.y);
 		}
 	}
 }

@@ -85,7 +85,7 @@ namespace Jambox
 				}
 				else
 				{
-					Application.Quit();
+//					Application.Quit();
 				}
 			}
 
