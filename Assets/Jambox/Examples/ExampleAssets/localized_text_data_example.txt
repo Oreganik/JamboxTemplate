@@ -1,0 +1,4 @@
+# All values are tab delimited
+# This is the schema
+# id	en_us
+hurt1	Fireball

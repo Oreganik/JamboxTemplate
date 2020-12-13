@@ -1,0 +1,50 @@
+﻿// GAME JAM PROJECT
+// Prototype Application
+// Copyright (c) 2020 Ted Brown
+
+using System;
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+
+namespace Prototype
+{
+	/// <summary>
+	/// 
+	/// </summary>
+	public class #SCRIPTNAME# : FState 
+	{
+		public override Enum Name
+		{
+			get { return ; }
+		}
+
+		// Should only be overridden by the initial state for the system you are creating
+		// Otherwise, delete this code block
+		// public override bool IsInitialState
+		// {
+		// 	get { return false; }
+		// }
+
+		protected override void OnInitializeEnd ()
+		{
+		}
+
+		protected override void RegisterTransitions ()
+		{
+			// AddTransition (Enum trigger, Enum nextState)
+		}
+
+		protected override void OnEnterEnd ()
+		{
+		}
+
+		protected override void OnProcessEnd (float deltaTime)
+		{
+		}
+
+		protected override void OnExitBegin ()
+		{
+		}
+	}
+}

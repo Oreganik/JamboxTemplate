@@ -1,17 +1,17 @@
-﻿// JAMBOX
-// General purpose game code for Unity
+﻿// TAC
 // Copyright (c) 2020 Ted Brown
 
+using Jambox;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace Jambox
+namespace Tac
 {
 	/// <summary>
-	/// 
+	/// A fixed reference used to find Agents and Spaces.
 	/// </summary>
-	public class #SCRIPTNAME# : MonoBehaviour 
+	public class Board : MonoBehaviour 
 	{
 	}
 }
