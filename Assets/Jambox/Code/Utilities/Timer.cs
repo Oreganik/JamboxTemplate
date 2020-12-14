@@ -7,7 +7,7 @@ using UnityEngine;
 namespace Jambox
 {
 	[System.Serializable]
-	public struct Timer 
+	public class Timer 
 	{
 		public bool IsComplete
 		{
