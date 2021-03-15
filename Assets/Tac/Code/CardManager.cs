@@ -16,9 +16,8 @@ namespace Tac
 	/// </summary>
     public class CardManager
     {
+		const int COLUMN_COUNT = 4;
 		const char EFFECT_ARRAY_SEPARATOR = ',';
-		const char EFFECT_VALUE_SEPARATOR = ':';
-		const int COLUMN_COUNT = 3;
 	
 		public static bool ErrorOnLoad
 		{
@@ -26,7 +25,7 @@ namespace Tac
 		}
 
 		private static bool s_errorOnLoad;
-		private static Dictionary<string, Card> s_cards;
+		private static Dictionary<string, Sequence> s_cards;
 
 		// Takes a text file, runs it through DataReader, and builds a card dictionary.
 		public static bool Initialize (string dataPath)
@@ -34,6 +33,7 @@ namespace Tac
 			// Read data from the file into a list of string arrays. Return if an error is encountered.
 			List<string[]> data;
 			s_errorOnLoad = DataReader.GetDataAsStringArray(dataPath, COLUMN_COUNT, out data);
+
 			if (s_errorOnLoad)
 			{
 				UnityEngine.Debug.LogError(string.Format("CardManager: Encountered an error processing data file '{0}'", dataPath));
@@ -49,6 +49,7 @@ namespace Tac
 			// Read data from the file into a list of string arrays. Return if an error is encountered.
 			List<string[]> data;
 			s_errorOnLoad = DataReader.GetDataAsStringArray(textAsset, COLUMN_COUNT, out data);
+
 			if (s_errorOnLoad)
 			{
 				UnityEngine.Debug.LogError(string.Format("CardManager: Encountered an error processing text asset '{0}'", textAsset.name));
@@ -61,90 +62,87 @@ namespace Tac
 		// Takes list of string arrays (usually from DataReader) and builds a card dictionary.
 		public static bool Initialize (List<string[]> data)
 		{
-		 	s_cards = new Dictionary<string, Card>();
+		 	s_cards = new Dictionary<string, Sequence>();
 
 			int cost = -1;
 			string id = string.Empty;
+			string rawFaction = string.Empty;
 			string rawCost = string.Empty;
 			string rawEffects = string.Empty;
 			string[] effectsArray = null;
-			string[] effectValues = null;
+			FactionType factionTarget;
 
 			// Process every data entry.
 			foreach (string[] entry in data)
 			{
+				bool errorForThisEntry = false;
+
 				// Get the data for this card
-				// Schema: Id [0], Effects [1], Cost [2]
+				// Schema: Id [0], Faction [1], Effects [2], Cost [3]
 				id = entry[0];
-				rawEffects = entry[1];
-				rawCost = entry[2];
+				rawFaction = entry[1];
+				rawEffects = entry[2];
+				rawCost = entry[3];
 
 				// NOTE: For the rest of this phase, if an error is thrown, the program will keep going.
 				// This helps raise as many data errors as possible.
+
+				// Make sure this id doesn't already exist in our database
+				if (s_cards.ContainsKey(id))
+				{
+					UnityEngine.Debug.LogError(string.Format("CardManager: A card with id '{0}' has already been added to the database", id));
+					errorForThisEntry = true;
+				}
+
+				// Determine the faction type
+				if (Enum.TryParse(rawFaction, ignoreCase: true, out factionTarget) == false)
+				{
+					UnityEngine.Debug.LogError(string.Format("CardManager: {0}: Could not parse '{1}' as FactionType", id, rawFaction));
+					errorForThisEntry = true;
+				}
 
 				// Determine the cost as an int
 				if (int.TryParse(rawCost, out cost) == false)
 				{
 					UnityEngine.Debug.LogError(string.Format("CardManager: {0}: Could not parse cost '{1}' as int", id, rawCost));
-					s_errorOnLoad = true;
+					errorForThisEntry = true;
 				}
 
 				// Determine the effect(s) for this card
 				List<Effect> effects = new List<Effect>();
 				effectsArray = rawEffects.Split(EFFECT_ARRAY_SEPARATOR);
 
-				foreach (string effectString in effectsArray)
+				foreach (string rawEffect in effectsArray)
 				{
-					// Effects are defined like this: effectType:modifier
-					effectValues = effectString.Split(EFFECT_VALUE_SEPARATOR);
+					Effect effect = new Effect(id, rawEffect);
 
-					EffectType effectType;
-
-					// Schema: EffectType [0], Value [1]
-					// Value is not always an int, so don't cast it.
-					try
+					if (effect.ErrorOnLoad)
 					{
-						effectType = (EffectType) Enum.Parse(typeof(EffectType), effectValues[0]);
+					 	UnityEngine.Debug.LogError(string.Format("CardManager: {0}: Encountered error creating effect '{1}'", id, rawEffect));
+						errorForThisEntry = true;
 					}
-					catch
+					else
 					{
-						UnityEngine.Debug.LogError(string.Format("CardManager: {0}: Could not parse '{1}' as EffectType", id, effectValues[0]));
-						s_errorOnLoad = true;
-						continue;
+						effects.Add(effect);
 					}
-
-					// Instantiate an effect class and add it to our list
-					bool errorCreatingEffect = false;
-					Effect newEffect = EffectManager.InstantiateEffect(effectType, effectValues[1], out errorCreatingEffect);
-
-					if (errorCreatingEffect)
-					{
-						UnityEngine.Debug.LogError(string.Format("CardManager: {0}: Encountered error creating effect '{1}'", id, effectString));
-						s_errorOnLoad = true;
-						continue;
-					}
-
-					effects.Add(newEffect);
 				}
 
-				// A card without any effects is useless: skip it.
+				// A card without any effects is useless
 				if (effects.Count == 0)
 				{
-					UnityEngine.Debug.LogError(string.Format("CardManager: {0}: Has no valid effects. Skipping", id));
-					s_errorOnLoad = true;
-					continue;
+					UnityEngine.Debug.LogError(string.Format("CardManager: {0}: Has no valid effects. Skipping.", id));
+					errorForThisEntry = true;
 				}
 
-				// Make sure this id doesn't already exist in our database
-				if (s_cards.ContainsKey(id))
+				if (errorForThisEntry)
 				{
-					UnityEngine.Debug.LogError(string.Format("CardManager: A card with id '{0}' has already been added to the database. Skipping", id));
 					s_errorOnLoad = true;
-					continue;
 				}
-
-				// Finally! Let's add the card to the database.
-				s_cards.Add(id, new Card(id, cost, effects.ToArray()));
+				else
+				{
+					// Finally! Let's add the card to the database.
+					s_cards.Add(id, new Sequence(id, cost, factionTarget, effects.ToArray()));
+				}
 			}
 
 			return s_errorOnLoad;
@@ -154,9 +152,9 @@ namespace Tac
 		/// Returns a card instance. Will return null if id can't be found.
 		/// </summary>
 		/// <param name="id">The id of the card as defined in the card database</param>
-		public static Card GetCard (string id)
+		public static Sequence CreateCard (string id)
 		{
-			Card card = null;
+			Sequence card = null;
 			if (s_cards.TryGetValue(id, out card) == false)
 			{
 				UnityEngine.Debug.LogError(string.Format("CardManager.GetCard could not find a card of id '{0}'", id));
@@ -178,7 +176,7 @@ namespace Tac
 		/// </summary>
 		public static void PrintCards ()
 		{
-			foreach (KeyValuePair<string, Card> entry in s_cards)
+			foreach (KeyValuePair<string, Sequence> entry in s_cards)
 			{
 				Console.Write(entry.Value.ToString());
 			}

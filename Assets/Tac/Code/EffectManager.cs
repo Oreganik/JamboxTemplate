@@ -9,6 +9,7 @@ using UnityEngine;
 
 namespace Tac
 {
+	#if false
 	/// <summary>
 	/// Instantiates effects
 	/// </summary>
@@ -50,4 +51,5 @@ namespace Tac
 			return effect;
 		}
 	}
+	#endif
 }

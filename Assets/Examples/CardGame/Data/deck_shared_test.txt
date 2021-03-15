@@ -1,0 +1,6 @@
+# All values are tab delimited
+# This is the schema
+# Card Id	Count
+hurt1	10
+hurt2	10
+hurt3	10

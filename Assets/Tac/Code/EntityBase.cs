@@ -18,19 +18,29 @@ namespace Tac
 		/// <summary>Base values of its attributes</summary>
 		private int[] _baseValues;
 
+		/// <summary>All card IDs available to this entity</summary>
+		private List<string> _cardIds;
+
 		/// <summary>Unique identifier that matches database entry</summary>
 		private string _id;
-		private string[] _cards;
+
+		public EntityBase (string id, int[] values)
+		{
+			_id = id;
+			_baseValues = new int[values.Length];
+			Array.Copy(values, _baseValues, values.Length);
+			_cardIds = new List<string>();
+		}
 
 		public EntityBase (string id, int[] values, List<string> cardIds)
 		{
 			_id = id;
 			_baseValues = new int[values.Length];
 			Array.Copy(values, _baseValues, values.Length);
-			_cards = cardIds.ToArray();
+			_cardIds = new List<string>(cardIds);
 		}
 
-		public void SetBaseValues (int[] values)
+		public void GetBaseValues (ref int[] values)
 		{
 			if (values == null)
 			{
@@ -50,7 +60,7 @@ namespace Tac
 
 		public Entity Spawn (Entity creator)
 		{
-			return new Entity(this, creator);
+			return new Entity(this, creator, _cardIds);
 		}
 	}
 }
