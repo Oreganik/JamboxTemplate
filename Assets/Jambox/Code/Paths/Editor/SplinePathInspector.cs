@@ -137,7 +137,7 @@ namespace Jambox
 
 			Handles.color = modeColors[(int)_spline.GetControlPointMode(index)];
 
-			if (Handles.Button(point, _handleRotation, size * HANDLE_SIZE, size * PICK_SIZE, Handles.DotCap))
+			if (Handles.Button(point, _handleRotation, size * HANDLE_SIZE, size * PICK_SIZE, Handles.DotHandleCap))
 			{
 				_selectedIndex = index;
 				Repaint();
