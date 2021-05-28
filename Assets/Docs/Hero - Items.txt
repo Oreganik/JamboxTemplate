@@ -1,0 +1,14 @@
+# Jambox Hero: Items
+
+
+Items are discrete objects in the game that can be picked up and dropped by entities, such as the hero, enemies, and treasure chests.
+
+All items have the following fields:
+- Category: This keeps things organized for inventory management, logic, etc. Ultimately, it's optional: you can leave it blank if you only have a few items in the game.
+	Examples: Key, Weapon, Potion
+- Id: This is a unique ID that is used by internal game logic.
+	Examples: security, big_sword, mana
+- Name: This is used by the display.
+	Examples: Security Card, Big Sword, Mana Juice
+
+# Example Items

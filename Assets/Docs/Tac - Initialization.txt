@@ -1,0 +1,19 @@
+TAC: Strategy Game Architecture
+Initialization
+Copyright (c) 2021 Ted Brown
+
+This document describes how TAC "boots up" and initializes.
+
+All data entries are delimited by newlines.
+
+1. Read Attributes file.
+Format: Name
+e.g. "Health"
+
+2. Read Effects file. 
+- Verify all Effect Keys have a class associated with them.
+- Verify Effect classes 
+Name\tArg0,Arg1,etc\n
+e.g.
+SlideMove	DirectionX,DirectionY
+
